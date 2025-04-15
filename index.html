@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add Your today's task</title>
+    <style>
+        :root{
+            --red: rgb(255, 100, 100);
+            --blue: rgb(0, 128, 255);
+            --green: rgb(0, 175, 79);
+        }
+        #app{
+            height: 100vh;
+        }
+        nav{
+        padding: 10px 10%;
+        }
+        body{
+            margin: 0px;
+            padding: 0px;
+            font: 1em sans-serif;
+        }
+        svg{
+            margin: 5px ;
+            width: 16px;
+            height: 16px;
+        }
+        .main-container{
+            padding: 20px;
+            display: flex;
+            gap: 8px;
+        }
+        h2{
+            text-align: center;
+        }
+        .main-container form,
+        .main-container >div{
+            border-radius: 8px;
+            background-color: rgba(170, 214, 255, 0.2);
+        }
+        form{
+            width: 270px;
+            display: grid;
+            justify-content: center;
+            align-content: start;
+            padding: 20px;
+        }
+        form .form-input{
+            display: grid;
+            gap: 4px;
+            padding: 10px 0px;
+        }
+        form input, select{
+            padding: 8px;
+            width: 250px;
+        }
+        .submit,
+        .cancel{
+            width: 266px;
+            padding: 10px 20px;
+            border-radius: 4px;
+            background-color: white;
+        }
+        .submit{
+            color: var(--blue);
+            border: 1px solid var(--blue);
+        }
+        .cancel{
+            color: var(--red);
+            border: 1px solid var(--red);
+        }
+        .submit:hover{
+            background-color: var(--blue);
+            color: white;
+            border: 1px solid var(--blue);
+        }
+        .cancel:hover{
+            background-color: var(--red);
+            color: white;
+            border: 1px solid var(--red);
+        }
+        #form-update{
+            display: none;
+        }
+        .method-container {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            padding: 10px;
+        }
+        #nodata{
+            display: block;
+            font-size: 50px;
+            color: rgba(128, 128, 128, 0.7);
+            text-align: center;
+            padding: 20px;
+        }
+        #data-container{
+            width: 100%;
+        }
+        #toggle{
+            display: block;
+        } 
+        #data-table{
+            width: 100%;
+        }
+        #data-container{
+            padding: 10px;
+        }
+        #data-container table th{
+            background-color: rgba(216, 126, 9, 0.974);
+            text-align: left;
+        }
+        #data-container table .actions{
+            min-width: 20px;
+            width: 20px;
+            max-width: 20px;
+        }
+        #data-table button {
+            cursor: pointer;
+            border-radius: 25px;
+        }
+        #data-table th:nth-child(1){
+            width: 10px;
+        }
+        #data-table th:nth-child(2){
+            word-wrap: break-word;
+        }
+        #data-table th:nth-child(3){
+            width: 50px;
+        }
+        #data-table th:nth-child(4){
+            width: 90px;
+        }
+        #data-table td:nth-child(4){
+            color: var(--red);
+        }
+        #data-table th:nth-child(5){
+            width: 30px;
+        }
+        #data-table th,td{
+            padding: 10px;
+            overflow: hidden;
+        }
+        #data-table tr:nth-child(even){
+            background-color: rgba(128, 128, 128, 0.25);
+        }
+        #data-table tr:hover{
+            background-color: rgba(128, 128, 128, 0.2);;
+        }
+        .completed td:nth-child(2){
+            opacity:0.5;
+            text-decoration: line-through;
+        }
+        .completed td:nth-child(4){
+            color: var(--green) !important;
+        }
+    </style>
+</head>
+<body>
+   <div id="app">
+    <nav>
+        <button id="darkMode" onclick="DarkMode()">DarkMode</button>
+    </nav>
+
+    
+    <h2>ToDo App</h2>
+    <div class="main-container">
+        <form id="form-add">
+            <div class="form-input">
+                <label for="appid">Add New Task</label>
+                <input type="text" name="appid" id="appid" placeholder="Enter Your Task" required>
+            </div>
+            <div class="form-input">
+                <button class="submit">Add Task</button>
+            </div>
+        </form>
+        <form id="form-update">
+            <div class="form-input">
+                <label for="updateid">Update Task</label>
+                <input type="text" name="updateid" id="updateid" placeholder="Enter Your Task" required>
+            </div>
+            <div class="form-input">
+                <label for="priority">Priority</label>
+                <select id="priority">
+                    <option value="high">High</option>
+                    <option value="normal">Normal</option>
+                    <option value="low">Low</option>
+                </select>
+            </div>
+            <div class="form-input">
+                <button class="submit">Update Task</button>
+            </div>
+            <div class="form-input">
+                <button class="cancel">Cancel</button>
+            </div>
+        </form>
+        <div id="data-container">
+            <div class="method-container">
+                <label for="filter">Filter by Status: </label>
+                <select id="filter" onchange="filterTasks()">
+                    <option value="all">All</option>
+                    <option value="completed">Completed</option>
+                    <option value="incomplete">Incomplete</option>
+                </select>
+                <button class="submit" onclick="sortTasks()">Sort by priority</button>
+            </div>
+            <div id="nodata">
+                No Task to display.
+            </div>
+            <div id="toggle">
+                <table id="data-table" style="width: 100%;">
+                    <thead>
+                    <tr>
+                        <th></th>
+                        <th>Today's Task</th>
+                        <th>Priority</th>
+                        <th>Task Status</th>
+                        <th class="actions">Actions</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Data rows will add -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+    <!-- script -->
+    <script>
+        function DarkMode(){
+            const app=document.getElementById('app');
+            const darkMode=document.getElementById('darkMode');
+            if(darkMode.innerText==="DarkMode"){
+                darkMode.innerHTML="DayMode";
+                app.style.backgroundColor="black";
+                app.style.color="white";
+            }
+            else{
+                darkMode.innerHTML="DarkMode";
+                app.style.backgroundColor="White";
+                app.style.color="Black";
+            }
+        }
+       
+        const formAdd = document.getElementById('form-add');
+        const appidInput = document.getElementById('appid');
+        const formUpdate = document.getElementById('form-update');
+        const updateidInput = document.getElementById('updateid');
+        const priorityInput = document.getElementById('priority');
+        const nodata = document.getElementById('nodata');
+        const toggle = document.getElementById('toggle');
+        const data = document.getElementById('data-table')
+        const dataTable = data.getElementsByTagName('tbody')[0];
+        const filterSelect = document.getElementById('filter');
+        const sortSelect = document.getElementById('sort');
+        
+        // Load tasks from localStorage
+        function loadTasks() {
+            const tasks = JSON.parse(localStorage.getItem('tasks')) || [];
+            dataTable.innerHTML = '';
+            tasks.forEach((task, index) => {
+                addRecord(task, index);
+            });
+            recordsCount();
+        }
+
+        let editIndex = null;
+        if (editIndex===null){
+            formAdd.addEventListener('submit', function(e) {
+                e.preventDefault();
+                const taskText = appidInput.value.trim();
+                if (!taskText) return;
+    
+                const tasks = JSON.parse(localStorage.getItem('tasks')) || [];
+                const newTask = {
+                    id: Date.now(),
+                    text: taskText,
+                    priority: 'normal',
+                    status: 'incomplete'
+                };
+                tasks.push(newTask);
+                localStorage.setItem('tasks', JSON.stringify(tasks));
+    
+                appidInput.value = ''; // Clear the input
+                loadTasks();
+            });
+        };
+
+        
+        function recordsCount() {  
+            rows = dataTable.getElementsByTagName("tr")
+            if (rows.length > 0 || rows === null) {
+                nodata.style.display = "none";
+                toggle.style.display = "block";
+            } else {
+                nodata.style.display = "block";
+                toggle.style.display = "none";
+            }
+        };
+        
+        function addRecord(task, index) {
+            const row = dataTable.insertRow();
+            row.dataset.index = index;
+            row.insertCell(0).innerHTML = `<input type="checkbox" onclick="updateStatus(this, ${index})" ${task.status === 'completed' ? 'checked' : ''}>`;
+            row.insertCell(1).textContent = task.text;
+            row.insertCell(2).textContent = task.priority.charAt(0).toUpperCase() + task.priority.slice(1);
+            row.insertCell(3).textContent = task.status.charAt(0).toUpperCase() + task.status.slice(1);
+
+            const actionsCell = row.insertCell(4);
+            const editButton = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path d="M471.6 21.7c-21.9-21.9-57.3-21.9-79.2 0L362.3 51.7l97.9 97.9 30.1-30.1c21.9-21.9 21.9-57.3 0-79.2L471.6 21.7zm-299.2 220c-6.1 6.1-10.8 13.6-13.5 21.9l-29.6 88.8c-2.9 8.6-.6 18.1 5.8 24.6s15.9 8.7 24.6 5.8l88.8-29.6c8.2-2.7 15.7-7.4 21.9-13.5L437.7 172.3 339.7 74.3 172.4 241.7zM96 64C43 64 0 107 0 160L0 416c0 53 43 96 96 96l256 0c53 0 96-43 96-96l0-96c0-17.7-14.3-32-32-32s-32 14.3-32 32l0 96c0 17.7-14.3 32-32 32L96 448c-17.7 0-32-14.3-32-32l0-256c0-17.7 14.3-32 32-32l96 0c17.7 0 32-14.3 32-32s-14.3-32-32-32L96 64z"/></svg>`
+            const delButton =  `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><path d="M135.2 17.7L128 32 32 32C14.3 32 0 46.3 0 64S14.3 96 32 96l384 0c17.7 0 32-14.3 32-32s-14.3-32-32-32l-96 0-7.2-14.3C307.4 6.8 296.3 0 284.2 0L163.8 0c-12.1 0-23.2 6.8-28.6 17.7zM416 128L32 128 53.2 467c1.6 25.3 22.6 45 47.9 45l245.8 0c25.3 0 46.3-19.7 47.9-45L416 128z"/></svg>`
+                    
+            actionsCell.innerHTML = `<span style="display: flex; gap: 10px;">
+                                    <button class="edit-btn" style="margin-right:10px;" onclick="editRecord(${index})">${editButton}</button>
+                                    <button class="delete-btn" onclick="deleteRecord(${index})">${delButton}</button>
+                                    </span>`;
+            
+            if (task.status === 'completed') {
+                row.classList.add("completed");
+            } else{
+                row.classList.remove("completed");
+            }
+        }
+
+        function deleteRecord(index) {
+            const tasks = JSON.parse(localStorage.getItem('tasks'));
+            tasks.splice(index, 1);
+            localStorage.setItem('tasks', JSON.stringify(tasks));
+            loadTasks();
+        }
+        
+        function editRecord(index) {
+            formAdd.style.display = "none";
+            formUpdate.style.display = "block";
+
+            editIndex = 1;
+            const tasks = JSON.parse(localStorage.getItem('tasks'));
+            const task = tasks[index];
+            updateidInput.value = task.text;
+            priorityInput.value = task.priority;
+
+            formUpdate.addEventListener('submit', function update(e) {
+                e.preventDefault();
+                task.text = updateidInput.value.trim();
+                task.priority = priorityInput.value.trim();
+                localStorage.setItem('tasks', JSON.stringify(tasks));
+                loadTasks();
+                formAdd.style.display = "block";
+                formUpdate.style.display = "none";
+            });
+            editIndex = null
+        }
+
+        function updateStatus(checkbox,index) {
+            const tasks = JSON.parse(localStorage.getItem('tasks'));
+            const task = tasks[index];
+            task.status = checkbox.checked ? 'completed' : 'incomplete';
+            localStorage.setItem('tasks', JSON.stringify(tasks));
+            loadTasks();   
+        }
+        
+        function filterTasks() {
+            const filter = filterSelect.value;
+            
+            const tasks = JSON.parse(localStorage.getItem('tasks')) || [];
+            const filteredTasks = tasks.filter(task => 
+                filter === 'all' || task.status === filter
+            );
+            dataTable.innerHTML = '';
+            filteredTasks.forEach((task, index) => addRecord(task, index));
+            recordsCount();
+        }
+
+        function sortTasks() {
+            // const sort = sortSelect.value;
+            const tasks = JSON.parse(localStorage.getItem('tasks')) || [];
+
+            const priorityOrder = {
+                'high': 1,
+                'normal': 2,
+                'low': 3
+            };
+            tasks.sort((a, b) => priorityOrder[a.priority] - priorityOrder[b.priority]);
+
+            dataTable.innerHTML = '';
+            tasks.forEach((task, index) => addRecord(task, index));
+            
+            recordsCount();
+        }
+
+
+        recordsCount();
+        loadTasks();
+    </script>
+</body>
+</html>
